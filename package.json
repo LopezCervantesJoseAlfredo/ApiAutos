@@ -7,7 +7,7 @@
     "swagger-themes": "^1.4.3",
     "swagger-ui-express": "^5.0.0"
   },
-  "name": "openapi",
+  "name": "apiautos",
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
