@@ -9,6 +9,7 @@
     "joi": "^17.13.1",
     "morgan": "^1.10.0",
     "mysql2": "^3.9.8",
+    "openapi-snippet": "^0.14.0",
     "path": "^0.12.7",
     "redoc": "^2.1.4",
     "redoc-express": "^2.1.0",
