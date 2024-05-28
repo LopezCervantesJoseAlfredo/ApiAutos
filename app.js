@@ -6,7 +6,7 @@ const express = require('express');
 const swaggerUI = require('swagger-ui-express');
 const morgan = require('morgan');
 const redoc = require('redoc-express');
-const rte = require('./routes/autos'); // Updated import to autos router
+const rte = require('./routes/index'); // Updated import to autos router
 const OpenApiSnippet = require('openapi-snippet');
 const app = express();
 
