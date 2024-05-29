@@ -1,21 +1,21 @@
-const fs = require('fs');
-const path = require('path');
-const cors = require('cors');
-const swaggerJsDoc = require('swagger-jsdoc');
 const express = require('express');
 const swaggerUI = require('swagger-ui-express');
-const morgan = require('morgan');
-const redoc = require('redoc-express');
-const rte = require('./routes/autos'); // Importa las rutas de autos
+const swaggerJsDoc = require('swagger-jsdoc');
+const path = require('path');
 const app = express();
+const fs = require('fs');
 
-app.use(express.json());
-app.use(cors());
+const { SwaggerTheme, SwaggerThemeNameEnum } = require('swagger-themes');
 
-const PORT = process.env.PORT || 8080;
+const theme = new SwaggerTheme();
+const options = {
+  explorer: true,
+  customCss: theme.getBuffer(SwaggerThemeNameEnum.DARK),
+};
 
-const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
-app.use(morgan('combined', { stream: accessLogStream }));
+app.use(express.static('/redoc.html'))
+
+const readmeContent = fs.readFileSync(path.join(__dirname, 'README.md'), 'utf8');
 
 const swaggerOptions = {
   definition: {
@@ -23,42 +23,37 @@ const swaggerOptions = {
     info: {
       title: 'API Autos',
       version: '1.0.0',
-      description: 'API para la gestión de autos',
+      description: readmeContent,
     },
-    servers: [
-      {
-        url: 'https://final-api-production.up.railway.app',
-        description: 'Servidor en Railway para API Autos',
-      },
-    ],
+    servers:[
+      {url: "http://localhost:3000"}
+    ], 
   },
-  apis: [path.join(__dirname, 'routes', 'autos.js')], // Referencia correcta a las rutas
+  apis: [`${path.join(__dirname,"./routes/index.js")}`],
 };
 
-const swaggerSpec = swaggerJsDoc(swaggerOptions);
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use("/api-docs",swaggerUI.serve,swaggerUI.setup(swaggerDocs,options));  
 
-app.use('/redoc', redoc({
-  title: 'API Autos',
-  specUrl: '/api-docs-json',
-}));
-
-app.get('/api-docs-redoc', redoc({
-  title: 'API Docs',
-  specUrl: '/api-docs-json',
-}));
-
-app.get('/', function (req, res) {
-  res.send('hello, world!');
+// Ruta para la especificación de la API en formato JSON
+app.get('/api-docs-json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerDocs);
 });
 
-app.use("/api-docs-json", (req, res) => {
-  res.json(swaggerSpec);
+// Rutas de ejemplo para probar Swagger
+app.get('/api/v1/example', (req, res) => {
+  res.json({ message: 'Hello from example route' });
 });
 
-app.use('/autos', rte.router); // Usa las rutas de autos
-
-app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec, { explorer: true }));
-
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log('Servidor Express escuchando en el puerto ' + PORT);
+  console.log(`Server is running on port ${PORT}`);
 });
+
+app.use(express.static(path.join(__dirname, 'redoc.html')));
+
+app.get('/redoc.html', (req, res)=>{
+  res.sendFile(path.join(__dirname,'redoc.html'));
+});
+
