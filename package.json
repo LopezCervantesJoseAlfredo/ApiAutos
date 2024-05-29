@@ -26,5 +26,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "API para gestionar información de autos, incluyendo marcas, modelos, años, y características.",
+  "devDependencies": {}
 }
