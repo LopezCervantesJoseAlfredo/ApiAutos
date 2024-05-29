@@ -6,7 +6,7 @@ const express = require('express');
 const swaggerUI = require('swagger-ui-express');
 const morgan = require('morgan');
 const redoc = require('redoc-express');
-const rte = require('./routes/autos'); // Import corrected
+const rte = require('./routes/autos'); // Importa las rutas de autos
 const app = express();
 
 app.use(express.json());
@@ -16,8 +16,6 @@ const PORT = process.env.PORT || 8080;
 
 const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
 app.use(morgan('combined', { stream: accessLogStream }));
-
-const openApiUrl = 'https://apiautos-production.up.railway.app/api-docs-json';
 
 const swaggerOptions = {
   definition: {
@@ -29,46 +27,24 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'https://apiautos-production.up.railway.app',
+        url: 'https://final-api-production.up.railway.app',
         description: 'Servidor en Railway para API Autos',
       },
     ],
   },
-  apis: [path.join(__dirname, 'routes', 'autos.js')],
+  apis: [path.join(__dirname, 'routes', 'autos.js')], // Referencia correcta a las rutas
 };
 
 const swaggerSpec = swaggerJsDoc(swaggerOptions);
 
 app.use('/redoc', redoc({
   title: 'API Autos',
-  specUrl: openApiUrl,
+  specUrl: '/api-docs-json',
 }));
 
 app.get('/api-docs-redoc', redoc({
   title: 'API Docs',
   specUrl: '/api-docs-json',
-  nonce: '',
-  redocOptions: {
-    theme: {
-      colors: {
-        primary: {
-          main: '#6EC5AB'
-        }
-      },
-      typography: {
-        fontFamily: `"museo-sans", 'Helvetica Neue', Helvetica, Arial, sans-serif`,
-        fontSize: '15px',
-        lineHeight: '1.5',
-        code: {
-          code: '#87E8C7',
-          backgroundColor: '#4D4D4E'
-        }
-      },
-      menu: {
-        backgroundColor: '#ffffff'
-      }
-    }
-  }
 }));
 
 app.get('/', function (req, res) {
@@ -79,7 +55,7 @@ app.use("/api-docs-json", (req, res) => {
   res.json(swaggerSpec);
 });
 
-app.use('/autos', rte.router); // Use autos router
+app.use('/autos', rte.router); // Usa las rutas de autos
 
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec, { explorer: true }));
 

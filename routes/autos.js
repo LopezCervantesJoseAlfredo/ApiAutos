@@ -85,7 +85,7 @@ function validarIdAuto(req, res, next) {
 router.get('/', async (req, res) => {
   try {
     const connection = await getDatabaseConnection();
-    const [results, fields] = await connection.execute('SELECT * FROM autos');
+    const [results] = await connection.execute('SELECT * FROM autos');
     res.json(results);
   } catch (error) {
     res.status(500).json({ error: 'Error en el servidor' });
@@ -118,12 +118,10 @@ router.get('/', async (req, res) => {
 router.get('/:idAuto', validarIdAuto, async (req, res) => {
   try {
     const connection = await getDatabaseConnection();
-    const [results, fields] = await connection.execute('SELECT * FROM autos WHERE id = ?', [req.params.idAuto]);
+    const [results] = await connection.execute('SELECT * FROM autos WHERE id = ?', [req.params.idAuto]);
 
     if (results.length === 0) {
-      return res.status(404).json({
-        resultado: "El auto no fue encontrado"
-      });
+      return res.status(404).json({ resultado: "El auto no fue encontrado" });
     }
 
     res.json(results);
@@ -161,49 +159,9 @@ router.post('/', async (req, res) => {
     }
 
     const connection = await getDatabaseConnection();
-    const sentenciaSQL = `INSERT INTO autos (marca, modelo, year, color) VALUES (?, ?, ?, ?)`;
-    const [results, fields] = await connection.execute(sentenciaSQL, [marca, modelo, year, color]);
-    res.json(results);
-  } catch (error) {
-    res.status(500).json({ error: 'Error en el servidor' });
-  }
-});
-
-/**
- * @swagger
- * /autos/{idAuto}:
- *   delete:
- *     summary: Elimina un auto por su ID.
- *     tags: [Eliminar]
- *     parameters:
- *       - in: path
- *         name: idAuto
- *         required: true
- *         description: ID del auto a eliminar.
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Auto eliminado exitosamente.
- *       404:
- *         description: El auto no fue encontrado.
- *       500:
- *         description: Error en el servidor.
- */
-router.delete('/:idAuto', validarIdAuto, async (req, res) => {
-  try {
-    const connection = await getDatabaseConnection();
-    const [results, fields] = await connection.execute(`DELETE FROM autos WHERE id = ?`, [req.params.idAuto]);
-
-    if (results.affectedRows === 1) {
-      res.json({
-        resultado: 'Auto eliminado'
-      });
-    } else {
-      res.status(404).json({
-        resultado: "El auto no fue encontrado"
-      });
-    }
+    const sentenciaSQL = 'INSERT INTO autos (marca, modelo, year, color) VALUES (?, ?, ?, ?)';
+    const [results] = await connection.execute(sentenciaSQL, [marca, modelo, year, color]);
+    res.status(200).json({ mensaje: "Auto creado exitosamente", id: results.insertId });
   } catch (error) {
     res.status(500).json({ error: 'Error en el servidor' });
   }
@@ -247,18 +205,14 @@ router.put('/:idAuto', validarIdAuto, async (req, res) => {
     }
 
     const connection = await getDatabaseConnection();
-    const sentenciaSQL = `UPDATE autos SET marca = ?, modelo = ?, year = ?, color = ? WHERE id = ?`;
-    const [results, fields] = await connection.execute(sentenciaSQL, [marca, modelo, year, color, req.params.idAuto]);
+    const sentenciaSQL = 'UPDATE autos SET marca = ?, modelo = ?, year = ?, color = ? WHERE id = ?';
+    const [results] = await connection.execute(sentenciaSQL, [marca, modelo, year, color, req.params.idAuto]);
 
-    if (results.affectedRows === 1) {
-      res.json({
-        resultado: 'Auto actualizado'
-      });
-    } else {
-      res.status(404).json({
-        resultado: "El auto no fue encontrado"
-      });
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ mensaje: "El auto no fue encontrado" });
     }
+
+    res.status(200).json({ mensaje: "Auto actualizado exitosamente" });
   } catch (error) {
     res.status(500).json({ error: 'Error en el servidor' });
   }
@@ -267,82 +221,37 @@ router.put('/:idAuto', validarIdAuto, async (req, res) => {
 /**
  * @swagger
  * /autos/{idAuto}:
- *   patch:
- *     summary: Actualiza parcialmente un auto por su ID.
- *     tags: [Editar]
+ *   delete:
+ *     summary: Elimina un auto por su ID.
+ *     tags: [Eliminar]
  *     parameters:
  *       - in: path
  *         name: idAuto
  *         required: true
- *         description: ID del auto a actualizar parcialmente.
+ *         description: ID del auto a eliminar.
  *         schema:
  *           type: integer
- *     requestBody:
- *       description: Datos parciales del auto a actualizar.
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Auto'
  *     responses:
  *       200:
- *         description: Auto actualizado parcialmente exitosamente.
- *       400:
- *         description: Faltan campos obligatorios en la solicitud.
+ *         description: Auto eliminado exitosamente.
  *       404:
  *         description: El auto no fue encontrado.
  *       500:
  *         description: Error en el servidor.
  */
-router.patch('/:idAuto', validarIdAuto, async (req, res) => {
+router.delete('/:idAuto', validarIdAuto, async (req, res) => {
   try {
-    const { marca, modelo, year, color } = req.body;
-
-    if (!marca && !modelo && !year && !color) {
-      return res.status(400).json({ mensaje: "Se requiere al menos un campo para actualizar" });
-    }
-
     const connection = await getDatabaseConnection();
-    const updates = [];
-    const params = [];
+    const [results] = await connection.execute('DELETE FROM autos WHERE id = ?', [req.params.idAuto]);
 
-    if (marca) {
-      updates.push('marca = ?');
-      params.push(marca);
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ mensaje: "El auto no fue encontrado" });
     }
 
-    if (modelo) {
-      updates.push('modelo = ?');
-      params.push(modelo);
-    }
-
-    if (year) {
-      updates.push('year = ?');
-      params.push(year);
-    }
-
-    if (color) {
-      updates.push('color = ?');
-      params.push(color);
-    }
-
-    params.push(req.params.idAuto);
-
-    const sentenciaSQL = `UPDATE autos SET ${updates.join(', ')} WHERE id = ?`;
-    const [results, fields] = await connection.execute(sentenciaSQL, params);
-
-    if (results.affectedRows === 1) {
-      res.json({
-        resultado: 'Auto actualizado parcialmente'
-      });
-    } else {
-      res.status(404).json({
-        resultado: "El auto no fue encontrado"
-      });
-    }
+    res.status(200).json({ mensaje: "Auto eliminado exitosamente" });
   } catch (error) {
     res.status(500).json({ error: 'Error en el servidor' });
   }
 });
 
-module.exports = { router, validarIdAuto };
+module.exports = { router };
