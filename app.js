@@ -5,7 +5,12 @@ const path = require('path');
 const app = express();
 const fs = require('fs');
 
-app.use(cors()); // Habilitar CORS para todas las rutas
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://apiautos-production.up.railway.app/');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
 
 const { SwaggerTheme, SwaggerThemeNameEnum } = require('swagger-themes');
 
