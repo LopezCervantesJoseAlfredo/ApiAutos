@@ -5,6 +5,8 @@ const path = require('path');
 const app = express();
 const fs = require('fs');
 
+app.use(cors()); // Habilitar CORS para todas las rutas
+
 const { SwaggerTheme, SwaggerThemeNameEnum } = require('swagger-themes');
 
 const theme = new SwaggerTheme();
