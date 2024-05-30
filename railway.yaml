@@ -1,0 +1,4 @@
+services:
+  - name: express
+    port: 8080
+    command: node index.js
