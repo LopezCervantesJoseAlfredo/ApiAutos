@@ -95,7 +95,7 @@ app.use("/api-docs-json", (req, res) => {
 
 app.use('/autos', autosRoutes);
 
-app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec, { explorer: true },options));
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec,options));
 
 app.listen(PORT, () => {
   console.log('Servidor Express escuchando en el puerto ' + PORT);
