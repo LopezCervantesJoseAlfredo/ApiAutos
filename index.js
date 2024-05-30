@@ -10,6 +10,16 @@ const autosRoutes = require('./routes/autos');
 const OpenApiSnippet = require('openapi-snippet');
 const app = express();
 
+const { SwaggerTheme, SwaggerThemeNameEnum } = require('swagger-themes');
+
+const theme = new SwaggerTheme();
+const readmeContent = fs.readFileSync(path.join(__dirname, 'README.md'), 'utf8');
+
+const options = {
+  explorer: true,
+  customCss: theme.getBuffer(SwaggerThemeNameEnum.DARK),
+};
+
 app.use(express.json());
 app.use(cors());
 
@@ -26,7 +36,7 @@ const swaggerOptions = {
     info: {
       title: 'API Autos',
       version: '1.0.0',
-      description: 'API para la gestión de autos',
+      description: readmeContent,
     },
     servers: [
       {
@@ -85,7 +95,7 @@ app.use("/api-docs-json", (req, res) => {
 
 app.use('/autos', autosRoutes);
 
-app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec, { explorer: true }));
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec, { explorer: true },options));
 
 app.listen(PORT, () => {
   console.log('Servidor Express escuchando en el puerto ' + PORT);
