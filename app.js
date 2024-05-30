@@ -4,6 +4,11 @@ const swaggerJsDoc = require('swagger-jsdoc');
 const path = require('path');
 const app = express();
 const fs = require('fs');
+const cors = require('cors');
+
+app.use(cors());
+// Your other middleware and routes go here
+app.use('/api', require('./index.js'));
 
 const { SwaggerTheme, SwaggerThemeNameEnum } = require('swagger-themes');
 
