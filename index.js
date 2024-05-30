@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 8080;
 var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
 app.use(morgan('combined', { stream: accessLogStream }));
 
-const openApiUrl = 'https://final-api-production.up.railway.app/api-docs-json';
+const openApiUrl = 'https://apiautos-production.up.railway.app/api-docs-json';
 
 const swaggerOptions = {
   definition: {
@@ -30,7 +30,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'https://final-api-production.up.railway.app',
+        url: 'https://apiautos-production.up.railway.app/',
         description: 'Servidor en Railway para API Autos',
       },
     ],
